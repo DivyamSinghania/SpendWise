@@ -1,52 +1,62 @@
 import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
-import Dashboard from './components/Dashboard';
-import ExpenseList from './components/ExpenseList';
-import AddExpense from './components/AddExpense';
-import BudgetSettings from './components/BudgetSettings';
-import AccountPage from './components/AccountPage';
+
+// ══════════════════════════════════════
+// IMPORTS - MODELS (API Layer)
+// ══════════════════════════════════════
+import { 
+    authAPI, 
+    expenseAPI, 
+    budgetAPI, 
+    summaryAPI 
+} from './models/api';
+
+// ══════════════════════════════════════
+// IMPORTS - VIEWS (UI Components)
+// ══════════════════════════════════════
+import DashboardView from './views/Dashboard';
+import ExpenseListView from './views/ExpenseList';
+import AddExpenseView from './views/AddExpense';
+import BudgetSettingsView from './views/BudgetSettings';
+import AccountPageView from './views/AccountPage';
+
 import './App.css';
 
-const API = 'http://localhost:5001';
 const TABS = ['Dashboard', 'Expenses', 'Add Expense', 'Budget', 'Account'];
 
-// ── Setup axios to send JWT token automatically ──
-axios.defaults.baseURL = API;
-axios.defaults.withCredentials = true;
-
-// This interceptor runs before EVERY axios request
-// It automatically adds the JWT token to the header
-axios.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
-
+// ══════════════════════════════════════
+// MAIN APP CONTROLLER
+// ══════════════════════════════════════
 export default function App() {
+    // ── UI State ──
     const [activeTab, setActiveTab] = useState('Dashboard');
+    const [toast, setToast] = useState(null);
+
+    // ── Data State ──
+    const [user, setUser] = useState(null);
     const [expenses, setExpenses] = useState([]);
     const [summary, setSummary] = useState(null);
     const [filter, setFilter] = useState({ category: 'All', month: '' });
-    const [loading, setLoading] = useState(false);
-    const [toast, setToast] = useState(null);
-    const [user, setUser] = useState(null);
-    const [authLoading, setAuthLoading] = useState(true);
 
+    // ── Loading State ──
+    const [authLoading, setAuthLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
+
+    // ══════════════════════════════════════
+    // HELPER: Toast Notification
+    // ══════════════════════════════════════
     const showToast = (msg, type = 'success') => {
         setToast({ msg, type });
         setTimeout(() => setToast(null), 3000);
     };
 
+    // ══════════════════════════════════════
+    // CONTROLLER: Fetch Data
+    // ══════════════════════════════════════
     const fetchExpenses = useCallback(async () => {
         setLoading(true);
         try {
-            const params = {};
-            if (filter.category !== 'All') params.category = filter.category;
-            if (filter.month) params.month = filter.month;
-            const res = await axios.get('/api/expenses', { params });
-            setExpenses(res.data);
+            const data = await expenseAPI.getExpenses(filter.category, filter.month);
+            setExpenses(data);
         } catch {
             showToast('Failed to load expenses', 'error');
         }
@@ -55,46 +65,57 @@ export default function App() {
 
     const fetchSummary = useCallback(async () => {
         try {
-            const res = await axios.get('/api/summary');
-            setSummary(res.data);
+            const data = await summaryAPI.getSummary();
+            setSummary(data);
         } catch {}
     }, []);
 
     const fetchCurrentUser = useCallback(async () => {
         setAuthLoading(true);
         try {
-            const res = await axios.get('/api/auth/me');
-            setUser(res.data.user);
+            const data = await authAPI.getCurrentUser();
+            setUser(data.user);
         } catch {
             setUser(null);
         }
         setAuthLoading(false);
     }, []);
 
-    // Check for Google OAuth redirect token in URL
+    // ══════════════════════════════════════
+    // CONTROLLER: Handle Google OAuth
+    // ══════════════════════════════════════
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const tokenFromURL = urlParams.get('token');
         
         if (tokenFromURL) {
-            // Save token from Google OAuth redirect
             localStorage.setItem('token', tokenFromURL);
-            // Clean URL
             window.history.replaceState({}, '', '/');
-            // Fetch user with this token
             fetchCurrentUser();
         }
     }, [fetchCurrentUser]);
 
+    // ══════════════════════════════════════
+    // CONTROLLER: Initial Data Load
+    // ══════════════════════════════════════
     useEffect(() => {
         fetchExpenses();
         fetchSummary();
         fetchCurrentUser();
     }, [fetchExpenses, fetchSummary, fetchCurrentUser]);
 
+    // ══════════════════════════════════════
+    // CONTROLLER: Add Expense
+    // ══════════════════════════════════════
     const handleAdd = async (expense) => {
         try {
-            await axios.post('/api/expenses', expense);
+            await expenseAPI.addExpense(
+                expense.title,
+                expense.amount,
+                expense.category,
+                expense.date,
+                expense.note
+            );
             showToast('Expense added!');
             fetchExpenses();
             fetchSummary();
@@ -104,9 +125,12 @@ export default function App() {
         }
     };
 
+    // ══════════════════════════════════════
+    // CONTROLLER: Delete Expense
+    // ══════════════════════════════════════
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`/api/expenses/${id}`);
+            await expenseAPI.deleteExpense(id);
             showToast('Expense deleted');
             fetchExpenses();
             fetchSummary();
@@ -115,9 +139,12 @@ export default function App() {
         }
     };
 
+    // ══════════════════════════════════════
+    // CONTROLLER: Update Budget
+    // ══════════════════════════════════════
     const handleBudget = async (monthly) => {
         try {
-            await axios.put('/api/budget', { monthly });
+            await budgetAPI.updateBudget(monthly);
             showToast('Budget updated!');
             fetchSummary();
         } catch {
@@ -125,15 +152,15 @@ export default function App() {
         }
     };
 
+    // ══════════════════════════════════════
+    // CONTROLLER: Login
+    // ══════════════════════════════════════
     const handleLogin = async (credentials) => {
         try {
-            const res = await axios.post('/api/auth/login', credentials);
-            
-            // ── Save JWT token to localStorage ──
-            localStorage.setItem('token', res.data.token);
-            
-            setUser(res.data.user);
-            showToast(`Welcome back, ${res.data.user.name}!`);
+            const result = await authAPI.login(credentials.email, credentials.password);
+            localStorage.setItem('token', result.token);
+            setUser(result.user);
+            showToast(`Welcome back, ${result.user.name}!`);
             return true;
         } catch (error) {
             showToast(
@@ -144,22 +171,27 @@ export default function App() {
         }
     };
 
-    // ── UPDATED: Signup accepts FormData now ──
+    // ══════════════════════════════════════
+    // CONTROLLER: Signup
+    // ══════════════════════════════════════
     const handleSignup = async (formData) => {
         try {
-            const res = await axios.post('/api/auth/signup', formData, {
-                headers: {
-                    // Let browser set Content-Type automatically
-                    // for FormData (includes boundary)
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
+            let email, password, name, profilePic;
             
-            // ── Save JWT token ──
-            localStorage.setItem('token', res.data.token);
-            
-            setUser(res.data.user);
-            showToast(`Account created for ${res.data.user.name}`);
+            // Extract values from FormData
+            if (formData instanceof FormData) {
+                email = formData.get('email');
+                password = formData.get('password');
+                name = formData.get('name');
+                profilePic = formData.get('profilePic');
+            } else {
+                ({ email, password, name } = formData);
+            }
+
+            const result = await authAPI.signup(name, email, password, profilePic);
+            localStorage.setItem('token', result.token);
+            setUser(result.user);
+            showToast(`Account created for ${result.user.name}`);
             return true;
         } catch (error) {
             showToast(
@@ -170,13 +202,13 @@ export default function App() {
         }
     };
 
+    // ══════════════════════════════════════
+    // CONTROLLER: Logout
+    // ══════════════════════════════════════
     const handleLogout = async () => {
         try {
-            await axios.post('/api/auth/logout');
-            
-            // ── Remove JWT token from localStorage ──
+            await authAPI.logout();
             localStorage.removeItem('token');
-            
             setUser(null);
             showToast('Logged out successfully');
         } catch {
@@ -184,6 +216,9 @@ export default function App() {
         }
     };
 
+    // ══════════════════════════════════════
+    // RENDER
+    // ══════════════════════════════════════
     return (
         <div className="app">
             <header className="header">
@@ -208,10 +243,10 @@ export default function App() {
 
             <main className="main">
                 {activeTab === 'Dashboard' && (
-                    <Dashboard summary={summary} expenses={expenses} />
+                    <DashboardView summary={summary} expenses={expenses} />
                 )}
                 {activeTab === 'Expenses' && (
-                    <ExpenseList
+                    <ExpenseListView
                         expenses={expenses}
                         filter={filter}
                         setFilter={setFilter}
@@ -220,13 +255,13 @@ export default function App() {
                     />
                 )}
                 {activeTab === 'Add Expense' && (
-                    <AddExpense onAdd={handleAdd} />
+                    <AddExpenseView onAdd={handleAdd} />
                 )}
                 {activeTab === 'Budget' && (
-                    <BudgetSettings summary={summary} onSave={handleBudget} />
+                    <BudgetSettingsView summary={summary} onSave={handleBudget} />
                 )}
                 {activeTab === 'Account' && (
-                    <AccountPage
+                    <AccountPageView
                         user={user}
                         onLogin={handleLogin}
                         onSignup={handleSignup}
