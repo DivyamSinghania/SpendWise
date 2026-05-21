@@ -27,7 +27,11 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 // Create uploads folder if not exists
-if (!fs.existsSync('uploads')) fs.mkdirSync('uploads');
+try {
+    if (!fs.existsSync('uploads')) fs.mkdirSync('uploads');
+} catch (err) {
+    console.log('Skipping uploads folder creation (read-only file system)');
+}
 
 // ══════════════════════════════════════
 // MIDDLEWARE
@@ -38,7 +42,8 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
-app.use('/uploads', express.static('uploads'));
+const uploadDir = process.env.NODE_ENV === 'production' ? '/tmp' : 'uploads';
+app.use('/uploads', express.static(uploadDir));
 
 // Serve static files from public folder
 app.use(express.static(path.join(__dirname, 'public')));
