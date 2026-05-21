@@ -2,12 +2,17 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/User');
 
-passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: process.env.CALLBACK_URL || 
-        'http://localhost:5001/auth/google/callback'
-}, async (accessToken, refreshToken, profile, done) => {
+// Only initialize Google OAuth if credentials are available
+if (process.env.GOOGLE_CLIENT_ID && 
+    process.env.GOOGLE_CLIENT_SECRET &&
+    !process.env.GOOGLE_CLIENT_ID.includes('your-') &&
+    !process.env.GOOGLE_CLIENT_SECRET.includes('your-')) {
+    passport.use(new GoogleStrategy({
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: process.env.CALLBACK_URL || 
+            'http://localhost:5001/auth/google/callback'
+    }, async (accessToken, refreshToken, profile, done) => {
     try {
         // Check if user already exists with this Google ID
         let user = await User.findOne({ googleId: profile.id });
@@ -39,7 +44,10 @@ passport.use(new GoogleStrategy({
     } catch (err) {
         return done(err, null);
     }
-}));
+    }));
+} else {
+    console.warn('⚠️  Google OAuth not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env to enable Google login.');
+}
 
 passport.serializeUser((user, done) => done(null, user._id));
 passport.deserializeUser(async (id, done) => {

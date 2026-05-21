@@ -3,7 +3,7 @@ import { useState } from 'react';
 const INITIAL_LOGIN = { email: '', password: '' };
 const INITIAL_SIGNUP = { name: '', email: '', password: '' };
 
-export default function AccountPageView({ 
+export default function AccountPage({ 
     user, 
     onLogin, 
     onSignup, 
@@ -82,7 +82,6 @@ export default function AccountPageView({
 
                 <div className="card account-card">
                     <div className="account-profile">
-                        
                         {user.profilePic ? (
                             <img
                                 src={`http://localhost:5001/${user.profilePic}`}
@@ -124,15 +123,11 @@ export default function AccountPageView({
                     <div className="account-detail-grid">
                         <div className="account-detail">
                             <span className="account-detail-label">Name</span>
-                            <span className="account-detail-value">
-                                {user.name}
-                            </span>
+                            <span className="account-detail-value">{user.name}</span>
                         </div>
                         <div className="account-detail">
                             <span className="account-detail-label">Email</span>
-                            <span className="account-detail-value">
-                                {user.email}
-                            </span>
+                            <span className="account-detail-value">{user.email}</span>
                         </div>
                         <div className="account-detail">
                             <span className="account-detail-label">Joined</span>
@@ -208,9 +203,7 @@ export default function AccountPageView({
                             className="form-input"
                             type="email"
                             value={loginForm.email}
-                            onChange={(e) => setLoginForm({ 
-                                ...loginForm, email: e.target.value 
-                            })}
+                            onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
                             placeholder="Enter your email"
                             required
                         />
@@ -221,9 +214,7 @@ export default function AccountPageView({
                             className="form-input"
                             type="password"
                             value={loginForm.password}
-                            onChange={(e) => setLoginForm({ 
-                                ...loginForm, password: e.target.value 
-                            })}
+                            onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
                             placeholder="Enter your password"
                             required
                         />
@@ -283,15 +274,9 @@ export default function AccountPageView({
                             type="file"
                             accept="image/*"
                             onChange={handleProfilePicChange}
-                            style={{ 
-                                padding: '0.5rem',
-                                cursor: 'pointer'
-                            }}
+                            style={{ padding: '0.5rem', cursor: 'pointer' }}
                         />
-                        <span style={{ 
-                            fontSize: '0.7rem', 
-                            color: 'var(--text3)' 
-                        }}>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text3)' }}>
                             Optional — JPG, PNG up to 5MB
                         </span>
                     </div>
@@ -302,9 +287,7 @@ export default function AccountPageView({
                             className="form-input"
                             type="text"
                             value={signupForm.name}
-                            onChange={(e) => setSignupForm({ 
-                                ...signupForm, name: e.target.value 
-                            })}
+                            onChange={(e) => setSignupForm({ ...signupForm, name: e.target.value })}
                             placeholder="Enter your full name"
                             required
                         />
@@ -315,9 +298,7 @@ export default function AccountPageView({
                             className="form-input"
                             type="email"
                             value={signupForm.email}
-                            onChange={(e) => setSignupForm({ 
-                                ...signupForm, email: e.target.value 
-                            })}
+                            onChange={(e) => setSignupForm({ ...signupForm, email: e.target.value })}
                             placeholder="Enter your email"
                             required
                         />
@@ -328,9 +309,7 @@ export default function AccountPageView({
                             className="form-input"
                             type="password"
                             value={signupForm.password}
-                            onChange={(e) => setSignupForm({ 
-                                ...signupForm, password: e.target.value 
-                            })}
+                            onChange={(e) => setSignupForm({ ...signupForm, password: e.target.value })}
                             placeholder="Create a password"
                             required
                         />
