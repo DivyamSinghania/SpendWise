@@ -16,7 +16,7 @@ const CAT_COLORS = {
 const fmt = (n) => `₹${Number(n).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 
 export default function Dashboard({ summary, expenses = [] }) {
-  if (!summary) return (
+  if (!summary || typeof summary === 'string') return (
     <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text3)' }}>
       Loading dashboard...
     </div>

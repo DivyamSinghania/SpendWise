@@ -56,6 +56,7 @@ export default function App() {
         setLoading(true);
         try {
             const data = await expenseAPI.getExpenses(filter.category, filter.month);
+            if (typeof data === 'string') throw new Error('API returned HTML');
             setExpenses(data);
         } catch {
             showToast('Failed to load expenses', 'error');
@@ -66,6 +67,7 @@ export default function App() {
     const fetchSummary = useCallback(async () => {
         try {
             const data = await summaryAPI.getSummary();
+            if (typeof data === 'string') throw new Error('API returned HTML');
             setSummary(data);
         } catch {}
     }, []);
@@ -74,6 +76,7 @@ export default function App() {
         setAuthLoading(true);
         try {
             const data = await authAPI.getCurrentUser();
+            if (typeof data === 'string' || !data.user) throw new Error('API returned HTML or invalid data');
             setUser(data.user);
         } catch {
             setUser(null);
