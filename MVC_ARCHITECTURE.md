@@ -5,11 +5,11 @@ The SpendWise project has been successfully refactored from a monolithic archite
 
 ---
 
-## Backend Architecture (Server)
+## Backend Architecture
 
 ### Project Structure
-```
-server/
+```text
+/ (Root Directory)
 ├── config/
 │   └── database.js              # MongoDB connection setup
 ├── middleware/
@@ -39,32 +39,32 @@ server/
 
 ### Component Descriptions
 
-#### **Models** (`server/models/`)
+#### **Models** (`models/`)
 - **User.js**: Defines the user data schema with authentication method support (local/Google)
 - **Expense.js**: Defines the expense data schema with category, date, and notes
 - **Budget.js**: Defines the monthly budget schema per user
 
-#### **Controllers** (`server/controllers/`)
+#### **Controllers** (`controllers/`)
 - **authController.js**: Handles signup, login, logout, getCurrentUser, and Google OAuth callback
 - **expenseController.js**: Handles CRUD operations for expenses (getExpenses, createExpense, deleteExpense)
 - **budgetController.js**: Handles budget retrieval and updates
 - **summaryController.js**: Calculates and returns dashboard summary data
 
-#### **Routes** (`server/routes/`)
+#### **Routes** (`routes/`)
 - **authRoutes.js**: Maps auth endpoints to authController
 - **expenseRoutes.js**: Maps expense endpoints to expenseController  
 - **budgetRoutes.js**: Maps budget endpoints to budgetController
 - **summaryRoutes.js**: Maps summary endpoints to summaryController
 
-#### **Middleware** (`server/middleware/`)
+#### **Middleware** (`middleware/`)
 - **auth.js**: JWT verification middleware for protected routes
 
-#### **Utilities** (`server/utils/`)
+#### **Utilities** (`utils/`)
 - **helpers.js**: Password hashing, JWT token generation, user sanitization
 - **upload.js**: Multer configuration for profile picture uploads
 - **passport.js**: Google OAuth 2.0 strategy setup
 
-#### **Config** (`server/config/`)
+#### **Config** (`config/`)
 - **database.js**: MongoDB connection initialization
 
 ---
@@ -72,8 +72,8 @@ server/
 ## Frontend Architecture (Client)
 
 ### Project Structure
-```
-client/src/
+```text
+src/
 ├── models/
 │   └── api.js                   # API service layer (axios instances)
 ├── views/
@@ -92,14 +92,14 @@ client/src/
 
 ### Component Descriptions
 
-#### **Models** (`client/src/models/`)
+#### **Models** (`src/models/`)
 - **api.js**: Centralized API service layer with axios configuration
   - `authAPI`: Login, signup, logout, getCurrentUser
   - `expenseAPI`: Get, add, delete expenses
   - `budgetAPI`: Get, update budget
   - `summaryAPI`: Get dashboard summary
 
-#### **Views** (`client/src/views/`)
+#### **Views** (`src/views/`)
 - **Dashboard.js**: Displays dashboard with stats, charts, and recent transactions
 - **ExpenseList.js**: Displays filterable expense table
 - **AddExpense.js**: Form to add new expenses
@@ -185,34 +185,37 @@ client/src/
 
 ## Running the Application
 
-### Backend
+### Both Backend & Frontend Simultaneously
 ```bash
-cd server
-npm install
-npm run dev  # or npm start
-```
-
-### Frontend
-```bash
-cd client
 npm install
 npm start
+```
+
+### Backend Only
+```bash
+npm run server
+```
+
+### Frontend Only
+```bash
+npm run client
 ```
 
 ---
 
 ## Environment Variables
 
-### Server (.env)
-```
+### Root Directory (.env)
+```env
 PORT=5001
 MONGODB_URI=mongodb://127.0.0.1:27017/spendwise
 JWT_SECRET=spendwise-secret
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
-CALLBACK_URL=http://localhost:5001/auth/google/callback
+CLIENT_URL=https://spend-wise-flame.vercel.app
+BACKEND_URL=https://your-backend-url
+REACT_APP_BACKEND_URL=https://your-backend-url
 ```
-
 ---
 
 ## Technology Stack

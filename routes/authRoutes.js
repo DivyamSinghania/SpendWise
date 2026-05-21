@@ -26,7 +26,7 @@ router.get('/google',
 
 router.get('/google/callback',
     passport.authenticate('google', { 
-        failureRedirect: 'http://localhost:3000/account' 
+        failureRedirect: `${process.env.CLIENT_URL || 'http://localhost:3000'}/account`
     }),
     authController.handleGoogleCallback
 );

@@ -114,9 +114,8 @@ const logout = (req, res) => {
 const handleGoogleCallback = async (req, res) => {
     try {
         const token = generateToken(req.user);
-        res.redirect(
-            `http://localhost:3000/?token=${token}`
-        );
+        const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+        res.redirect(`${clientUrl}/?token=${token}`);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Google auth failed' });

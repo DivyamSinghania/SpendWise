@@ -11,7 +11,7 @@ if (process.env.GOOGLE_CLIENT_ID &&
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         callbackURL: process.env.CALLBACK_URL || 
-            'http://localhost:5001/auth/google/callback'
+            `${process.env.BACKEND_URL || 'http://localhost:5001'}/auth/google/callback`
     }, async (accessToken, refreshToken, profile, done) => {
     try {
         // Check if user already exists with this Google ID

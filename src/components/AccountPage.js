@@ -57,7 +57,8 @@ export default function AccountPage({
     };
 
     const handleGoogleLogin = () => {
-        window.location.href = 'http://localhost:5001/auth/google';
+        const apiUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5001';
+        window.location.href = `${apiUrl}/auth/google`;
     };
 
     if (loading) {
@@ -84,7 +85,7 @@ export default function AccountPage({
                     <div className="account-profile">
                         {user.profilePic ? (
                             <img
-                                src={`http://localhost:5001/${user.profilePic}`}
+                                src={`${process.env.REACT_APP_BACKEND_URL || 'http://localhost:5001'}/${user.profilePic}`}
                                 alt="Profile"
                                 className="account-avatar-img"
                                 style={{
