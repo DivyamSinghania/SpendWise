@@ -66,7 +66,7 @@ export default function ExpenseList({ expenses, filter, setFilter, onDelete, loa
             </thead>
             <tbody>
               {expenses.map(e => (
-                <tr key={e.id} className="expense-row">
+                <tr key={e._id} className="expense-row">
                   <td>
                     <div className="expense-title">{e.title}</div>
                     {e.note && <div className="expense-note">{e.note}</div>}
@@ -84,7 +84,7 @@ export default function ExpenseList({ expenses, filter, setFilter, onDelete, loa
                     <span className="expense-amount">{fmt(e.amount)}</span>
                   </td>
                   <td>
-                    <button className="delete-btn" onClick={() => onDelete(e.id)}>✕</button>
+                    <button className="delete-btn" onClick={() => onDelete(e._id)}>✕</button>
                   </td>
                 </tr>
               ))}
